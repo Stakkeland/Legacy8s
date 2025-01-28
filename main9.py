@@ -4,7 +4,6 @@ import random
 import asyncio
 
 BOT_TOKEN = "MTMzMzY1MTgwNjE0ODEwMDEwNg.GRWneG.PZqfo9jyS8OxitYGYHqmsHwylLejaCFzu3exY0"
-#CHANNEL_ID = 1260445599443062824
 CHANNEL_ID = 1333649194639949825
 PUBLIC_KEY = "5e5e8cc217c23f92ae66d7c26e9797f05d6c33150f3cc82c37d19e465945e8dc"
 APPLICATION_ID = 1333651806148100106
@@ -57,6 +56,7 @@ class QueueView(discord.ui.View):
         self.create_buttons()
 
     def create_buttons(self):
+        '''Create a join button for each game in the queue'''
         for game in queues.keys():
             join_button = self.create_join_button(game)
             self.add_item(join_button)
@@ -64,6 +64,7 @@ class QueueView(discord.ui.View):
         self.add_item(leave_button)
 
     def create_join_button(self, game):
+        '''Create a button to join the queue for a game'''
         button = discord.ui.Button(label=game, style=discord.ButtonStyle.success)
 
         async def join_queue(interaction: discord.Interaction):
@@ -85,6 +86,7 @@ class QueueView(discord.ui.View):
         return button
 
     def create_leave_button(self):
+        '''Create a button to leave the queue'''
         button = discord.ui.Button(label="Leave Queue", style=discord.ButtonStyle.danger)
 
         async def leave_queue(interaction: discord.Interaction):
@@ -100,6 +102,7 @@ class QueueView(discord.ui.View):
         return button
     
     def create_mapset(self, game):
+        '''Create a random mapset for the given game'''
         hardpoint = random.choice(hardpoints[game])
         hardpoint2 = random.choice(hardpoints[game])
         if hardpoint == hardpoint2:
@@ -116,11 +119,9 @@ class QueueView(discord.ui.View):
         embed.add_field(name="Hardpoint:", value=hardpoint2, inline=True)
         embed.add_field(name="Search and Destroy:", value=snd, inline=True)
         return embed
-        
-        # Send the mapset to the match text channel
-        #return f" Mapset\n Hardpoint: {hardpoint}\n Hardpoint: {hardpoint2} \n Search and Destroy: {snd} \n \n "
 
-    async def create_teams(self, channel, queue, game):
+    async def create_teams(self, channel, queue, game): # Need to split this function up into multiple functions
+        '''Create two teams and send the mapset'''
         random.shuffle(queue)
         team1 = queue[:1]
         team2 = queue[1:]
@@ -158,14 +159,14 @@ class QueueView(discord.ui.View):
 
         # Send the names of all Discord users in the category and the countdown message
         member_mentions = [member.mention for member in team1 + team2]
-        await match_channel.send(f"Members in this match: {' , '.join(member_mentions)} \n . \n .")
+        await match_channel.send(f"Members in this match: {' , '.join(member_mentions)}")
         countdown_message = await match_channel.send("Channels and Match will end if all users do not join in the next 4 minutes")
 
         # Schedule deletion of the category after 4 minutes to check if all members have joined
         await self.schedule_initial_check(category, 4, team1 + team2, countdown_message)
 
-    # Schedule a countdown message to be edited every second for a delay
     async def schedule_initial_check(self, category, delay_mins, members, countdown_message):
+        '''Schedule a countdown message to be edited every second for a delay'''
         for i in range(delay_mins, 0, -1):
             await countdown_message.edit(content=f"Channels and Match will end if all users do not join in the next {i} minutes")
             await asyncio.sleep(60)
@@ -182,16 +183,16 @@ class QueueView(discord.ui.View):
             await countdown_message.delete()
             await self.delete_category_and_channels(category)
 
-    # Schedule deletion of the category after a delay if all voice channels are empty
     async def schedule_category_deletion(self, category, delay):
+        '''Schedule deletion of the category after a delay if all voice channels are empty'''
         await asyncio.sleep(delay)
         if all(len(vc.members) == 0 for vc in category.voice_channels):
             await self.delete_category_and_channels(category)
         else:
             await self.schedule_category_deletion(category, 5 * 60)  # Check again in 5 minutes
 
-    # Delete the category and all its channels
     async def delete_category_and_channels(self, category):
+        '''Delete the category and all its channels'''
         for channel in category.channels:
             await channel.delete()
         await category.delete()
