@@ -3,10 +3,11 @@ from discord.ext import commands
 import random
 import asyncio
 
-BOT_TOKEN = "MTI2MDQzODc1MDExOTU5MjAxOA.Gt6gJ2.K9104dwxFH-z10-E0p3hE9cgVNGEt6hFw6ixrU"
-CHANNEL_ID = 1260445599443062824
-PUBLIC_KEY = "2228e8f50ff38c8fe501700947d87e57f6a9f44194877b7c0029574c45773ac1"
-APPLICATION_ID = 1260438750119592018
+BOT_TOKEN = "MTMzMzY1MTgwNjE0ODEwMDEwNg.GRWneG.PZqfo9jyS8OxitYGYHqmsHwylLejaCFzu3exY0"
+#CHANNEL_ID = 1260445599443062824
+CHANNEL_ID = 1333649194639949825
+PUBLIC_KEY = "5e5e8cc217c23f92ae66d7c26e9797f05d6c33150f3cc82c37d19e465945e8dc"
+APPLICATION_ID = 1333651806148100106
 
 # Queue Numbers
 queues = {
@@ -156,9 +157,9 @@ class QueueView(discord.ui.View):
         queue.clear()
 
         # Send the names of all Discord users in the category and the countdown message
-        member_names = [member.name for member in team1 + team2]
-        await match_channel.send(f"Members in this match: {' , '.join(member_names)} \n . \n .")
-        countdown_message = await match_channel.send("Channels and Match will end if all users do not join in the next 3 minutes")
+        member_mentions = [member.mention for member in team1 + team2]
+        await match_channel.send(f"Members in this match: {' , '.join(member_mentions)} \n . \n .")
+        countdown_message = await match_channel.send("Channels and Match will end if all users do not join in the next 4 minutes")
 
         # Schedule deletion of the category after 4 minutes to check if all members have joined
         await self.schedule_initial_check(category, 4, team1 + team2, countdown_message)
