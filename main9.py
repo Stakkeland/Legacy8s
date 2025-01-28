@@ -12,22 +12,26 @@ APPLICATION_ID = 1260438750119592018
 queues = {
     "MWIII": [],
     "MWII": [],
-    "VG": [],
-    "CW": [],
-    "WWII": [],
-    "IW": [],
+    "Vanguard": [],
+    "Cold War": [],
+    "World War II": [],
+    "Infinite Warfare": [],
     "BO3": [],
     "AW": [],
     "BO2": [],
-    "BO1": [],
 }
 
 # Hardpoint Map Options
 hardpoints = {
     "MWIII": ["6 Star", "Karachi", "Rio", "Sub Base", "Vista", "Skidrow", "Invasion"],
     "MWII": ["Embassy", "Fortress", "Hotel", "Mercado", "Hydroelectric"],
-    "VG": ["Tuscan", "Bocage", "Berlin", "Gavutu", "Gavutu"],
-    "CW": ["Checkmate", "Apocalypse", "Garrison", "Moscow", "Raid"],
+    "Vangaurd": ["Tuscan", "Bocage", "Berlin", "Gavutu", "Gavutu"],
+    "Cold War": ["Checkmate", "Apocalypse", "Garrison", "Moscow", "Raid"],
+    "World War II": ["Ardennes Forest","Saint Marie Du Mont", "London Docks", "Valkyrie", "Gibraltar"],
+    "Infinite Warfare": ["Throwback", "Scorch", "Mayday", "Precinct", "Breakout", "Frost"],
+    "BO3": ["Evac", "Fringe", "Stronghold", "Hunted", "Breach", "Redwood"], # Not right, AI
+    "AW": ["Detroit", "Bio Lab", "Solar", "Recovery", "Retreat", "Ascend"], # Not right, AI
+    "BO2": ["Slums", "Raid", "Standoff", "Plaza", "Meltdown", "Express"], # Not right, AI
 
 }
 
@@ -35,8 +39,13 @@ hardpoints = {
 snds = {
     "MWIII": ["Terminal", "Skidrow", "Rio", "Karachi", "Highrise", "Invasion"],
     "MWII": ["El Asilo", "Fortress", "Hotel", "Embassy", "Mercado"],
-    "VG": ["Tuscan", "Bocage", "Berlin", "Desert Siege"],
-    "CW": ["Express", "Miami", "Moscow", "Raid", "Standoff"],
+    "Vangaurd": ["Tuscan", "Bocage", "Berlin", "Desert Siege"],
+    "Cold War": ["Express", "Miami", "Moscow", "Raid", "Standoff"],
+    "World War II": ["Ardennes Forest", "Saint Marie Du Mont", "London Docks", "Valkyrie", "USS Texas"],
+    "Infinite Warfare": ["Crusher", "Retaliation", "Scorch", "Frost", "Throwback", "Mayday"],
+    "BO3": ["Fringe", "Stronghold", "Hunted", "Evac", "Breach", "Redwood"], # Not right, AI
+    "AW": ["Detroit", "Bio Lab", "Solar", "Recovery", "Retreat", "Ascend"], # Not right, AI
+    "BO2": ["Slums", "Raid", "Standoff", "Plaza", "Meltdown", "Express"], # Not right, AI
 }
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
@@ -180,7 +189,7 @@ async def on_ready():
     while True:
         embed.clear_fields()
         for game, queue in queues.items():
-            embed.add_field(name=f"{game} Queue: ", value=len(queue))
+            embed.add_field(name=f"{game} : ", value=len(queue))
         await embed_message.edit(embed=embed)
         await asyncio.sleep(1)
 
