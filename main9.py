@@ -135,6 +135,7 @@ class QueueView(discord.ui.View):
         team1_invite = await team1_channel.create_invite(max_age=300)
         team2_invite = await team2_channel.create_invite(max_age=300)
 
+        # Send the mapset in an embed
         mapset_embed = self.create_mapset(game)
         await match_channel.send(f"Welcome to your {game} match!")
         await match_channel.send(embed=mapset_embed)
@@ -159,11 +160,16 @@ class QueueView(discord.ui.View):
         await match_channel.send(f"Members in this match: {' , '.join(member_names)} \n . \n .")
         countdown_message = await match_channel.send("Channels and Match will end if all users do not join in the next 3 minutes")
 
-        # Schedule deletion of the category after 5 minutes to check if all members have joined
-        await self.schedule_initial_check(category, 5 * 60, team1 + team2, countdown_message)
+        # Schedule deletion of the category after 4 minutes to check if all members have joined
+        await self.schedule_initial_check(category, 4, team1 + team2, countdown_message)
 
-    async def schedule_initial_check(self, category, delay, members, countdown_message):
-        for i in range(delay, 0, -1):
+    # Schedule a countdown message to be edited every second for a delay
+    async def schedule_initial_check(self, category, delay_mins, members, countdown_message):
+        for i in range(delay_mins, 0, -1):
+            await countdown_message.edit(content=f"Channels and Match will end if all users do not join in the next {i} minutes")
+            await asyncio.sleep(60)
+
+        for i in range(60, 0, -1):
             await countdown_message.edit(content=f"Channels and Match will end if all users do not join in the next {i} seconds")
             await asyncio.sleep(1)
 
@@ -175,6 +181,7 @@ class QueueView(discord.ui.View):
             await countdown_message.delete()
             await self.delete_category_and_channels(category)
 
+    # Schedule deletion of the category after a delay if all voice channels are empty
     async def schedule_category_deletion(self, category, delay):
         await asyncio.sleep(delay)
         if all(len(vc.members) == 0 for vc in category.voice_channels):
@@ -182,6 +189,7 @@ class QueueView(discord.ui.View):
         else:
             await self.schedule_category_deletion(category, 5 * 60)  # Check again in 5 minutes
 
+    # Delete the category and all its channels
     async def delete_category_and_channels(self, category):
         for channel in category.channels:
             await channel.delete()
