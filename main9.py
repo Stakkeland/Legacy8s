@@ -25,7 +25,7 @@ queues = {
 hardpoints = {
     "MWIII": ["6 Star", "Karachi", "Rio", "Sub Base", "Vista", "Skidrow", "Invasion"],
     "MWII": ["Embassy", "Fortress", "Hotel", "Mercado", "Hydroelectric"],
-    "Vangaurd": ["Tuscan", "Bocage", "Berlin", "Gavutu", "Gavutu"],
+    "Vanguard": ["Tuscan", "Bocage", "Berlin", "Gavutu", "Gavutu"],
     "Cold War": ["Checkmate", "Apocalypse", "Garrison", "Moscow", "Raid"],
     "World War II": ["Ardennes Forest","Saint Marie Du Mont", "London Docks", "Valkyrie", "Gibraltar"],
     "Infinite Warfare": ["Throwback", "Scorch", "Mayday", "Precinct", "Breakout", "Frost"],
@@ -39,7 +39,7 @@ hardpoints = {
 snds = {
     "MWIII": ["Terminal", "Skidrow", "Rio", "Karachi", "Highrise", "Invasion"],
     "MWII": ["El Asilo", "Fortress", "Hotel", "Embassy", "Mercado"],
-    "Vangaurd": ["Tuscan", "Bocage", "Berlin", "Desert Siege"],
+    "Vanguard": ["Tuscan", "Bocage", "Berlin", "Desert Siege"],
     "Cold War": ["Express", "Miami", "Moscow", "Raid", "Standoff"],
     "World War II": ["Ardennes Forest", "Saint Marie Du Mont", "London Docks", "Valkyrie", "USS Texas"],
     "Infinite Warfare": ["Crusher", "Retaliation", "Scorch", "Frost", "Throwback", "Mayday"],
@@ -77,7 +77,7 @@ class QueueView(discord.ui.View):
             queue.append(user)
             await interaction.response.send_message(f"{user.name} has joined the {game} queue!", ephemeral=True)
             
-            if len(queue) == 2: #supposed to be 8 people, changing to 2 for testing
+            if len(queue) == 2: #supposed to be 8 people, changing to 1 for testing
                 await self.create_teams(interaction.channel, queue, game)
 
         button.callback = join_queue
@@ -105,7 +105,19 @@ class QueueView(discord.ui.View):
             while hardpoint == hardpoint2:
                 hardpoint2 = random.choice(hardpoints[game])
         snd = random.choice(snds[game])
-        return f" Mapset\n Hardpoint: {hardpoint}\n Hardpoint: {hardpoint2} \n Search and Destroy: {snd}"
+
+        # Send the mapset in an embed
+        embed = discord.Embed(
+        title=f"Mapset",
+        )
+        embed.set_footer(text="Legacy 8's")
+        embed.add_field(name="Hardpoint:", value=hardpoint, inline=True)
+        embed.add_field(name="Hardpoint:", value=hardpoint2, inline=True)
+        embed.add_field(name="Search and Destroy:", value=snd, inline=True)
+        return embed
+        
+        # Send the mapset to the match text channel
+        #return f" Mapset\n Hardpoint: {hardpoint}\n Hardpoint: {hardpoint2} \n Search and Destroy: {snd} \n \n "
 
     async def create_teams(self, channel, queue, game):
         random.shuffle(queue)
@@ -123,9 +135,9 @@ class QueueView(discord.ui.View):
         team1_invite = await team1_channel.create_invite(max_age=300)
         team2_invite = await team2_channel.create_invite(max_age=300)
 
-        # Create mapset string and send it to match text channel
-        message = self.create_mapset(game)
-        await match_channel.send(f"Welcome to your {game} match! \n \n {message}")
+        mapset_embed = self.create_mapset(game)
+        await match_channel.send(f"Welcome to your {game} match!")
+        await match_channel.send(embed=mapset_embed)
 
         # Send Dm to team members with invite link
         for member in team1:
@@ -144,21 +156,23 @@ class QueueView(discord.ui.View):
 
         # Send the names of all Discord users in the category and the countdown message
         member_names = [member.name for member in team1 + team2]
-        await match_channel.send(f"\n Members in this match: {', '.join(member_names)}")
-        countdown_message = await match_channel.send("Channels will be deleted if a user does not join in the next 5 minutes")
+        await match_channel.send(f"Members in this match: {' , '.join(member_names)} \n . \n .")
+        countdown_message = await match_channel.send("Channels and Match will end if all users do not join in the next 3 minutes")
 
         # Schedule deletion of the category after 5 minutes to check if all members have joined
-        await self.schedule_initial_check(category, 1 * 60, team1 + team2, countdown_message) # changed to 1 minute for testing
+        await self.schedule_initial_check(category, 5 * 60, team1 + team2, countdown_message)
 
     async def schedule_initial_check(self, category, delay, members, countdown_message):
         for i in range(delay, 0, -1):
-            await countdown_message.edit(content=f"\n Channels will be deleted if a user does not join in the next {i} seconds")
+            await countdown_message.edit(content=f"Channels and Match will end if all users do not join in the next {i} seconds")
             await asyncio.sleep(1)
 
         if all(any(member in vc.members for vc in category.voice_channels) for member in members):
-            # Schedule deletion of the category after 50 minutes or when all members have left
-            await self.schedule_category_deletion(category, 50 * 60)
+            # Schedule deletion of the category after 40 minutes or when all members have left
+            await countdown_message.delete()
+            await self.schedule_category_deletion(category, 40 * 60)
         else:
+            await countdown_message.delete()
             await self.delete_category_and_channels(category)
 
     async def schedule_category_deletion(self, category, delay):
