@@ -3,7 +3,7 @@ from discord.ext import commands
 import random
 import asyncio
 
-BOT_TOKEN = "MTMzMzY1MTgwNjE0ODEwMDEwNg.GRWneG.PZqfo9jyS8OxitYGYHqmsHwylLejaCFzu3exY0"
+BOT_TOKEN = "" # delete token before uploading to git
 CHANNEL_ID = 1333649194639949825
 PUBLIC_KEY = "5e5e8cc217c23f92ae66d7c26e9797f05d6c33150f3cc82c37d19e465945e8dc"
 APPLICATION_ID = 1333651806148100106
